@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2017 Red Hat, Inc.
+  ~
+  ~ Red Hat licenses this file to you under the Apache License, version 2.0
+  ~ (the "License"); you may not use this file except in compliance with the
+  ~ License.  You may obtain a copy of the License at:
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+  ~ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+  ~ License for the specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+  <entry key="findAllGenres"><![CDATA[
+SELECT
+  g.id,
+  g.name
+FROM genres g
+ORDER BY g.name
+  ]]>
+  </entry>
+  <entry key="findGenreById"><![CDATA[
+SELECT g.name
+FROM genres g
+WHERE g.id = ?
+  ]]>
+  </entry>
+  <entry key="findAlbumsByGenre"><![CDATA[
+SELECT DISTINCT
+  a.id,
+  a.title
+FROM tracks t, genres g, albums a
+WHERE t.genre_id = g.id
+      AND t.album_id = a.id
+      AND t.genre_id = ?
+ORDER BY a.title;
+  ]]>
+  </entry>
+  <entry key="findArtistsByGenre"><![CDATA[
+SELECT DISTINCT
+  a.id,
+  a.name
+FROM tracks t, genres g, artists a
+WHERE t.genre_id = g.id
+      AND t.artist_id = a.id
+      AND t.genre_id = ?
+ORDER BY a.name;
+  ]]>
+  </entry>
+  <entry key="findAlbumById"><![CDATA[
+SELECT
+  a.title,
+  a.mb_album_id
+FROM albums a
+WHERE a.id = ?
+  ]]>
+  </entry>
+  <entry key="findTracksByAlbum"><![CDATA[
+SELECT
+  t.id,
+  t.track_number,
+  t.title,
+  t.mb_track_id,
+  ar.id,
+  ar.name AS artist_name
+FROM tracks t, artists ar
+WHERE t.artist_id = ar.id
+      AND t.album_id = ?
+ORDER BY t.track_number
+  ]]>
+  </entry>
+  <entry key="findArtistById"><![CDATA[
+SELECT a.name
+FROM artists a
+WHERE a.id = ?
+  ]]>
+  </entry>
+  <entry key="findAlbumsByArtist"><![CDATA[
+SELECT DISTINCT
+  ab.id,
+  ab.title
+FROM tracks t, albums ab, artists ar
+WHERE t.album_id = ab.id
+      AND t.artist_id = ar.id
+      AND t.artist_id = ?
+ORDER BY ab.title
+  ]]>
+  </entry>
+  <entry key="insertUser"><![CDATA[
+INSERT INTO users (username, password, password_salt) VALUES (?, ?, ?)
+  ]]>
+  </entry>
+  <entry key="authenticateUser"><![CDATA[
+SELECT
+  password,
+  password_salt
+FROM users
+WHERE username = ?
+  ]]>
+  </entry>
+  <entry key="findRolesByUser"><![CDATA[
+SELECT role
+FROM user_roles
+WHERE username = ?
+  ]]>
+  </entry>
+  <entry key="findPermissionsByUser"><![CDATA[
+SELECT rp.perm
+FROM roles_perms rp, users_roles ur
+WHERE rp.role = ur.role AND ur.username = ?
+  ]]>
+  </entry>
+</properties>

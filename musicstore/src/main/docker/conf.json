@@ -1,0 +1,8 @@
+{
+  "datasource": {
+    "url": "jdbc:postgresql://postgres:5432/musicdb"
+  },
+  "mongo": {
+    "url": "mongodb://mongo"
+  }
+}

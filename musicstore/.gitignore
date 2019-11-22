@@ -1,0 +1,6 @@
+*.iml
+.vertx/
+.idea/
+target/
+hdiv/conf/license.hdiv
+hdiv/agent/*.jar
