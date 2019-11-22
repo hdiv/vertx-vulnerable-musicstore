@@ -82,12 +82,12 @@ docker exec musicstore-db pg_dump -a --inserts --exclude-table=schema_version -h
 * Untrusted Deserialization: http://localhost:8080/deserialize
 
 === Vulnerable end-points (virtual patch)
- * Add to agentConfig.properties:
- [source,shell]
- ----
+
+[source,shell]
+----
  virtual_patch.attackBlackList.XX={"ip"\:null,"uri"\:null,"headers"\:{"hola"\:"\=\=adios"},"cookies"\:null,"queryString"\:null,"maxRequestNumber"\:0,"windowDurationSeconds"\:1,"appName"\:null,"byteCodePatch"\:false}
  virtual_patch.attackBlackListDesc.XX=MyPatch
- ----
+----
 
  * Example:
 image::headers.png[headers]
