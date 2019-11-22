@@ -89,5 +89,12 @@ docker exec musicstore-db pg_dump -a --inserts --exclude-table=schema_version -h
  virtual_patch.attackBlackListDesc.XX=MyPatch
 ----
 
- * Example:
+[cols=1,frame=none,grid=none]
+|===
+
+a|
+:figure-caption!:
+.headers Page
 image::headers.png[headers]
+
+|===
