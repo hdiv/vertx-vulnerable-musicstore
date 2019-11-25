@@ -80,6 +80,8 @@ docker exec musicstore-db pg_dump -a --inserts --exclude-table=schema_version -h
 * SQL Injection: http://localhost:8080/artists/163?hack=1%20and%201=1
 * Path Traversal: http://localhost:8080/pathtraversal?filename=/etc/password
 * Untrusted Deserialization: http://localhost:8080/deserialize
+* XXE: http://localhost:8080/xxe
+* XPath: http://localhost:8080/xpath?user=or%20%271%27=%271&pass=or%20%271%27=%271
 
 === Vulnerable end-points (virtual patch)
 
