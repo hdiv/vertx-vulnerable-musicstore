@@ -9,7 +9,6 @@ package io.vertx.demo.musicstore.xpath;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.servlet.ServletException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -20,14 +19,9 @@ import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-/**
- *
- * @author breakthesec
- */
-
 public class XPathTest {
 
-	protected void doAttack(final String user, final String pass) throws ServletException, IOException {
+	protected boolean doLogin(final String user, final String pass) {
 
 		try {
 			// Parsing XML:
@@ -44,15 +38,22 @@ public class XPathTest {
 			// running Xpath query:
 			String name = xPath.compile(xPression).evaluate(xDoc);
 			System.out.println("hacked xpath" + name);
+			if (name != null && !name.isEmpty()) {
+				return true;
+			}
+			else {
+				return false;
+			}
 
 		}
-		catch (ParserConfigurationException | XPathExpressionException | SAXException e) {
+		catch (ParserConfigurationException | XPathExpressionException | SAXException | IOException e) {
 			e.printStackTrace();
+			return false;
 		}
 
 	}
 
-	public InputStream getResourceAsStream(String name) {
+	private InputStream getResourceAsStream(String name) {
 		name = resolveName(name);
 		ClassLoader cl = this.getClass().getClassLoader();
 		if (cl == null) {
