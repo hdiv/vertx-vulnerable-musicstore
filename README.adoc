@@ -80,8 +80,9 @@ docker exec musicstore-db pg_dump -a --inserts --exclude-table=schema_version -h
 ==== SQl Injection
 
 Threre are two sql injection vulnerable endpoints:
-* http://localhost:8080/artists/163?hack=1%20and%201=1
-* Threre is an endpoint which you could download artists data in CSV file. You should filter by artistid parameter: http://localhost:8080/api/csv?artistId=1 union select 1,1,1,1,1,1,username, password from users
+
+* http://localhost:8080/artists/163?hack=1%20and%201=1.
+* Threre is an endpoint which you could download artists data in CSV file. You should filter by artistid parameter: http://localhost:8080/api/csv?artistId=1 union select 1,1,1,1,1,1,username, password from users.
 
 ==== Path traversal
 
@@ -91,9 +92,9 @@ http://localhost:8080/pathtraversal?filename=/Users/montero/Documents/desarrollo
 
 ==== Untrusted deserialization
 
-Upload XML files and deserialize with XStream.
-There are four example RCE payloads in: src/resources/payloadXStreamXXX.xml
-You could try it from postman using url: http://localhost:8080/deserialize
+* Upload XML files and deserialize with XStream.
+* There are four example RCE payloads in: src/resources/payloadXStreamXXX.xml.
+* You could try it from postman using url: http://localhost:8080/deserialize.
 
 [cols=1,frame=none,grid=none]
 |===
@@ -107,11 +108,11 @@ image::deserialize.png[deserialize]
 
 ==== XXE
 
-Upload XML files and map to java objects.
-There is an example RCE payload in: src/resources/payloadXXE.xml
-There is an example normal payload in: src/resources/payloadFoo.xml
-You could try it from postman using url: http://localhost:8080/xxe.
-The xml can be processed by Jackson or SAX. Use parameter "mapper" with values: custom or jackson.
+* Upload XML files and map to java objects.
+* There is an example RCE payload in: src/resources/payloadXXE.xml
+* There is an example normal payload in: src/resources/payloadFoo.xml
+* You could try it from postman using url: http://localhost:8080/xxe.
+* The xml can be processed by Jackson or SAX. Use parameter "mapper" with values: custom or jackson.
 
 [cols=1,frame=none,grid=none]
 |===
@@ -126,8 +127,10 @@ image::xxe.png[xxe]
 ==== XPath Injection
 
 Simulate a dummy login process where list of users is in XML.
-If endpoint return true, you have access permissions.
-If endpoint return false, you don't have access permissions.
+* If endpoint return true, you have access permissions.
+* If endpoint return false, you don't have access permissions.
+
+Examples:
 
 * Access granted: http://localhost:8080/xpath?user=neo&pass=trinity
 * Access denied: http://localhost:8080/xpath?user=neo&pass=trinityXX
