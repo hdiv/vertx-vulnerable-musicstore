@@ -20,7 +20,7 @@ import java.io.File;
 
 import io.vertx.core.Handler;
 import io.vertx.core.json.Json;
-import io.vertx.demo.musicstore.Article;
+import io.vertx.demo.musicstore.model.Article;
 import io.vertx.reactivex.ext.web.RoutingContext;
 
 /**

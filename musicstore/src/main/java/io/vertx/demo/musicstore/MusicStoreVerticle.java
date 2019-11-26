@@ -32,9 +32,9 @@ import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonObject;
 import io.vertx.demo.musicstore.error.CustomErrorHandler;
 import io.vertx.demo.musicstore.pathtraversal.PathTraversalHandler;
-import io.vertx.demo.musicstore.serialize.DeserializeHandler;
+import io.vertx.demo.musicstore.serialize.DeserializeUploadAsyncHandler;
 import io.vertx.demo.musicstore.xpath.XPathHandler;
-import io.vertx.demo.musicstore.xxe.XXEHandler;
+import io.vertx.demo.musicstore.xxe.XXEUploadAsyncHandler;
 import io.vertx.ext.bridge.PermittedOptions;
 import io.vertx.ext.web.handler.sockjs.BridgeOptions;
 import io.vertx.reactivex.core.AbstractVerticle;
@@ -68,6 +68,8 @@ public class MusicStoreVerticle extends AbstractVerticle {
 	private JDBCAuth authProvider;
 
 	private FreeMarkerTemplateEngine templateEngine;
+
+	private final String FILE_UPLOAD_LOCATION = System.getProperty("java.io.tmpdir");
 
 	@Override
 	public Completable rxStart() {
@@ -129,12 +131,14 @@ public class MusicStoreVerticle extends AbstractVerticle {
 		IndexHandler indexHandler = new IndexHandler(dbClient, dbQueries, templateEngine);
 		router.get("/").handler(indexHandler);
 		router.get("/index.html").handler(indexHandler);
-
 		router.get("/genres/:genreId").handler(new GenreHandler(dbClient, dbQueries, templateEngine));
-		router.get("/deserialize").handler(new DeserializeHandler());
+
+		// Enable multipart form data parsing
+		router.post("/deserialize").handler(BodyHandler.create().setUploadsDirectory(FILE_UPLOAD_LOCATION));
+		router.post("/deserialize").handler(new DeserializeUploadAsyncHandler());
 
 		router.get("/pathtraversal").handler(new PathTraversalHandler());
-		router.get("/xxe").handler(new XXEHandler());
+		router.post("/xxe").handler(new XXEUploadAsyncHandler());
 		router.get("/xpath").handler(new XPathHandler());
 		router.get("/error").handler(new CustomErrorHandler());
 		router.get("/albums/:albumId").handler(new AlbumHandler(dbClient, dbQueries, templateEngine));
