@@ -30,6 +30,8 @@ import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonObject;
+import io.vertx.demo.musicstore.csv.CSVDownloadHandler;
+import io.vertx.demo.musicstore.csv.DatabaseHandler;
 import io.vertx.demo.musicstore.error.CustomErrorHandler;
 import io.vertx.demo.musicstore.pathtraversal.PathTraversalHandler;
 import io.vertx.demo.musicstore.serialize.DeserializeUploadAsyncHandler;
@@ -149,6 +151,10 @@ public class MusicStoreVerticle extends AbstractVerticle {
 
 		router.post("/api/albums/:albumId/comments").consumes("text/plain").handler(new AddAlbumCommentHandler(mongoDatabase));
 
+		DatabaseHandler dbHandler = new DatabaseHandler(dbClient, vertx.eventBus().consumer(DatabaseHandler.ADDRESS), vertx);
+		dbHandler.execute();
+		router.get("/api/csv").handler(new CSVDownloadHandler(vertx));
+
 		router.get("/login").handler(new ReturnUrlHandler());
 		router.get("/login").handler(rc -> templateEngine.rxRender(rc.data(), "templates/login").subscribe(rc.response()::end, rc::fail));
 		router.post("/login").handler(FormLoginHandler.create(authProvider));
@@ -159,23 +165,21 @@ public class MusicStoreVerticle extends AbstractVerticle {
 
 		router.route().handler(StaticHandler.create());
 
-		if (1 == 2) {
-			// Si ponemos gestor de excepciones propio
-			// ya no sale la pagina de error de hdiv
-			router.route().failureHandler(ctx -> {
-				StringWriter sw = new StringWriter();
-				PrintWriter pw = new PrintWriter(sw);
-				ctx.failure().printStackTrace(pw);
+		// Si ponemos gestor de excepciones propio
+		// ya no sale la pagina de error de hdiv
+		router.route().failureHandler(ctx -> {
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			ctx.failure().printStackTrace(pw);
 
-				final JsonObject error = new JsonObject().put("timestamp", System.nanoTime())
-						.put("exception", ctx.failure().getClass().getName()).put("exceptionMessage", sw.toString())
-						.put("path", ctx.request().path());
+			final JsonObject error = new JsonObject().put("timestamp", System.nanoTime())
+					.put("exception", ctx.failure().getClass().getName()).put("exceptionMessage", sw.toString())
+					.put("path", ctx.request().path());
 
-				ctx.response().putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8");
-				ctx.response().end(error.encode());
+			ctx.response().putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8");
+			ctx.response().end(error.encode());
 
-			});
-		}
+		});
 
 		return vertx.createHttpServer().requestHandler(router).rxListen(8080).ignoreElement();
 	}

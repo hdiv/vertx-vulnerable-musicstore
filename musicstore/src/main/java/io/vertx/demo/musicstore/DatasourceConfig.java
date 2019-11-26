@@ -33,6 +33,7 @@ public class DatasourceConfig {
 		url = datasourceConfig.getString("url", "jdbc:postgresql://localhost:5433/musicdb");
 		user = datasourceConfig.getString("user", "music");
 		password = datasourceConfig.getString("password", "music");
+
 	}
 
 	public String getUrl() {
