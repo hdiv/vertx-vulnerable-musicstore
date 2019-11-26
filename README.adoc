@@ -77,13 +77,63 @@ docker exec musicstore-db pg_dump -a --inserts --exclude-table=schema_version -h
 === Vulnerable end-points
 
 
-* SQL Injection: http://localhost:8080/artists/163?hack=1%20and%201=1
-* Path Traversal: http://localhost:8080/pathtraversal?filename=/etc/password
-* Untrusted Deserialization: http://localhost:8080/deserialize
-* XXE: http://localhost:8080/xxe
-* XPath: http://localhost:8080/xpath?user=or%20%271%27=%271&pass=or%20%271%27=%271
+==== SQl Injection
 
-=== Vulnerable end-points (virtual patch)
+Threre are two sql injection vulnerable endpoints:
+* http://localhost:8080/artists/163?hack=1%20and%201=1
+* Threre is an endpoint which you could download artists data in CSV file. You should filter by artistid parameter: http://localhost:8080/api/csv?artistId=1 union select 1,1,1,1,1,1,username, password from users
+
+==== Path traversal
+
+There is an endpoint through which you can read remote files on the server. User parameter "filename" to set the path and name of the file to read.
+
+http://localhost:8080/pathtraversal?filename=/Users/montero/Documents/desarrollo/labs2/vertx/vertx-vulnerable-musicstore/musicstore/src/main/resources/db/migration/V3__AuthTables.sql
+
+==== Untrusted deserialization
+
+Upload XML files and deserialize with XStream.
+There are four example RCE payloads in: src/resources/payloadXStreamXXX.xml
+You could try it from postman using url: http://localhost:8080/deserialize
+
+[cols=1,frame=none,grid=none]
+|===
+
+a|
+:figure-caption!:
+.headers Page
+image::deserialize.png[deserialize]
+
+|===
+
+==== XXE
+
+Upload XML files and map to java objects.
+There is an example RCE payload in: src/resources/payloadXXE.xml
+There is an example normal payload in: src/resources/payloadFoo.xml
+You could try it from postman using url: http://localhost:8080/xxe.
+The xml can be processed by Jackson or SAX. Use parameter "mapper" with values: custom or jackson.
+
+[cols=1,frame=none,grid=none]
+|===
+
+a|
+:figure-caption!:
+.headers Page
+image::xxe.png[xxe]
+
+|===
+
+==== XPath Injection
+
+Simulate a dummy login process where list of users is in XML.
+If endpoint return true, you have access permissions.
+If endpoint return false, you don't have access permissions.
+
+* Access granted: http://localhost:8080/xpath?user=neo&pass=trinity
+* Access denied: http://localhost:8080/xpath?user=neo&pass=trinityXX
+* Access granted: http://localhost:8080/xpath?user=1' or '1'='1&pass=1' or '1'='1
+
+==== Virtual patch
 
 [source,shell]
 ----
