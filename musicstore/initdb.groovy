@@ -18,7 +18,7 @@ import groovy.sql.Sql
 import org.flywaydb.core.Flyway
 
 def db = [
-  url     : 'jdbc:postgresql://localhost:5433/musicdb',
+  url     : 'jdbc:postgresql://localhost:5432/musicdb',
   user    : 'music',
   password: 'music',
   driver  : 'org.postgresql.Driver'

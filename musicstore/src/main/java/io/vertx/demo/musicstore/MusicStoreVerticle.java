@@ -51,6 +51,7 @@ import io.vertx.reactivex.ext.web.handler.StaticHandler;
 import io.vertx.reactivex.ext.web.handler.sockjs.SockJSHandler;
 import io.vertx.reactivex.ext.web.sstore.LocalSessionStore;
 import io.vertx.reactivex.ext.web.templ.freemarker.FreeMarkerTemplateEngine;
+import org.flywaydb.core.Flyway;
 
 /**
  * @author Thomas Segismont
@@ -90,10 +91,10 @@ public class MusicStoreVerticle extends AbstractVerticle {
 
 	private Completable updateDB() {
 		return vertx.rxExecuteBlocking(future -> {
-			// Flyway flyway = new Flyway();
-			// flyway.setDataSource(datasourceConfig.getUrl(), datasourceConfig.getUser(), datasourceConfig.getPassword());
-			// flyway.setValidateOnMigrate(false);
-			// flyway.migrate();
+			Flyway flyway = new Flyway();
+			flyway.setDataSource(datasourceConfig.getUrl(), datasourceConfig.getUser(), datasourceConfig.getPassword());
+			flyway.setValidateOnMigrate(false);
+			flyway.migrate();
 			future.complete();
 		}).ignoreElement();
 	}

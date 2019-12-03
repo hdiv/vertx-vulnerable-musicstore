@@ -2,16 +2,20 @@ version: '2'
 services:
   vertx-musicstore:
     build: .
+    volumes:
+      - $HDIV_CONFIG:/hdiv/config
+      - $HDIV_AGENT:/hdiv/hdiv-ee-agent.jar
+    environment:
+      - JAVA_OPTS=$JAVA_OPTS
     ports:
-      - "8081:8080"
-      - "7778:7778"
+      - $HTTP_PORT:8080
     depends_on:
       - "postgres"
       - "mongo"
   postgres:
     image: "postgres"
     ports:
-      - "5433:5432"
+      - "5432:5432"
     environment:
       - POSTGRES_USER=music
       - POSTGRES_PASSWORD=music
