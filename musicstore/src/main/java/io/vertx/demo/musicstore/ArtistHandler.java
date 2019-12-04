@@ -53,7 +53,7 @@ public class ArtistHandler implements Handler<RoutingContext> {
 	@Override
 	public void handle(final RoutingContext rc) {
 		Long artistId = PathUtil.parseLongParam(rc.pathParam("artistId"));
-		System.out.println("path artistId:" + artistId);
+
 		if (artistId == null) {
 			rc.next();
 			return;

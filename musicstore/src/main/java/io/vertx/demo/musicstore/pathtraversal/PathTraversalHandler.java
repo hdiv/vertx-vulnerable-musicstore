@@ -17,15 +17,14 @@
 package io.vertx.demo.musicstore.pathtraversal;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import io.vertx.core.Handler;
 import io.vertx.core.json.Json;
-import io.vertx.demo.musicstore.Article;
 import io.vertx.reactivex.ext.web.RoutingContext;
 
-/**
- * @author Thomas Segismont
- */
 public class PathTraversalHandler implements Handler<RoutingContext> {
 
 	public PathTraversalHandler() {
@@ -34,10 +33,26 @@ public class PathTraversalHandler implements Handler<RoutingContext> {
 
 	@Override
 	public void handle(final RoutingContext routingContext) {
-		Article article = new Article(12, "This is an intro to vertx");
 		String fileName = routingContext.request().getParam("filename");
-		new File(fileName);
-		routingContext.response().putHeader("content-type", "application/json").setStatusCode(200).end(Json.encodePrettily(article));
+
+		routingContext.vertx().executeBlocking(future -> {
+			File file = new File(fileName);
+			if (file.exists()) {
+				try {
+					future.complete(new String(Files.readAllBytes(Paths.get(fileName))));
+				}
+				catch (IOException e) {
+					future.complete(fileName + ":Error read ");
+				}
+			}
+			else {
+				future.complete(fileName + " not found");
+			}
+
+		}, res -> {
+			routingContext.response().putHeader("content-type", "application/json").setStatusCode(200)
+					.end(Json.encodePrettily(res.result()));
+		});
 
 	}
 

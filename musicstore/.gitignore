@@ -1,6 +1,9 @@
 *.iml
+.DS_Store
 .vertx/
 .idea/
+.settings/
 target/
-hdiv/conf/license.hdiv
-hdiv/agent/*.jar
+hdiv/
+!hdiv/conf/agent.config
+!hdiv/conf/license.hdiv

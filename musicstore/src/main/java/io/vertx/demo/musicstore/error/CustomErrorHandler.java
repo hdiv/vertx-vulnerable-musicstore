@@ -16,12 +16,16 @@
 
 package io.vertx.demo.musicstore.error;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import io.vertx.core.Handler;
-import io.vertx.demo.musicstore.Article;
+import io.vertx.core.json.Json;
+import io.vertx.demo.musicstore.model.Article;
 import io.vertx.reactivex.ext.web.RoutingContext;
 
 /**
- * @author Thomas Segismont
+ * Example error stack in json object. Http status 200 It could be used as test of stack trace leak
  */
 public class CustomErrorHandler implements Handler<RoutingContext> {
 
@@ -30,12 +34,12 @@ public class CustomErrorHandler implements Handler<RoutingContext> {
 	}
 
 	@Override
-	public void handle(final RoutingContext routingContext) {
-		Article article = new Article(12, "This is an intro to vertx");
-		throw new RuntimeException("toma un error");
-
-		// routingContext.response().putHeader("content-type", "application/json").setStatusCode(200).end(Json.encodePrettily(article));
-
+	public void handle(final RoutingContext ctx) {
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		new Exception().printStackTrace(pw);
+		Article article = new Article(12, sw.toString());
+		ctx.response().putHeader("content-type", "application/json").setStatusCode(200).end(Json.encodePrettily(article));
 	}
 
 }

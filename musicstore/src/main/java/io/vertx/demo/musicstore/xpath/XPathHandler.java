@@ -18,11 +18,10 @@ package io.vertx.demo.musicstore.xpath;
 
 import io.vertx.core.Handler;
 import io.vertx.core.json.Json;
-import io.vertx.demo.musicstore.Article;
 import io.vertx.reactivex.ext.web.RoutingContext;
 
 /**
- * @author Thomas Segismont
+ * Simulate login process, where data is in xml file
  */
 public class XPathHandler implements Handler<RoutingContext> {
 
@@ -35,20 +34,14 @@ public class XPathHandler implements Handler<RoutingContext> {
 
 		String user = routingContext.request().getParam("user");
 		String pass = routingContext.request().getParam("pass");
-
-		Article article = new Article(12, "This is an intro to vertx");
-
 		XPathTest test = new XPathTest();
-		try {
-			System.out.println("XPath attack...");
-			test.doAttack(user, pass);
-			System.out.println("XPath attack...finish");
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
 
-		routingContext.response().putHeader("content-type", "application/json").setStatusCode(200).end(Json.encodePrettily(article));
+		routingContext.vertx().executeBlocking(future -> {
+			future.complete(test.doLogin(user, pass));
+		}, res -> {
+			routingContext.response().putHeader("content-type", "application/json").setStatusCode(200)
+					.end(Json.encodePrettily(res.result()));
+		});
 
 	}
 

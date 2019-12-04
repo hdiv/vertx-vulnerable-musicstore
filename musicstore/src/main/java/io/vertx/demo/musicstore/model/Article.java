@@ -1,4 +1,4 @@
-package io.vertx.demo.musicstore;
+package io.vertx.demo.musicstore.model;
 
 public class Article {
 

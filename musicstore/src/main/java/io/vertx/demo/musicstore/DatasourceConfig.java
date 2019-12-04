@@ -30,9 +30,10 @@ public class DatasourceConfig {
 	private final String password;
 
 	public DatasourceConfig(final JsonObject datasourceConfig) {
-		url = datasourceConfig.getString("url", "jdbc:postgresql://localhost:5433/musicdb");
+		url = datasourceConfig.getString("url", "jdbc:postgresql://localhost:5432/musicdb");
 		user = datasourceConfig.getString("user", "music");
 		password = datasourceConfig.getString("password", "music");
+
 	}
 
 	public String getUrl() {

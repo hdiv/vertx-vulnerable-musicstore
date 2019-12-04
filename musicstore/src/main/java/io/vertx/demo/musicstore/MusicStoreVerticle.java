@@ -22,6 +22,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Properties;
 
+import org.flywaydb.core.Flyway;
+
 import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoClients;
 import com.mongodb.reactivestreams.client.MongoDatabase;
@@ -31,11 +33,13 @@ import io.reactivex.Single;
 import io.vertx.core.Launcher;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonObject;
+import io.vertx.demo.musicstore.csv.CSVDownloadHandler;
+import io.vertx.demo.musicstore.csv.DatabaseHandler;
 import io.vertx.demo.musicstore.error.CustomErrorHandler;
 import io.vertx.demo.musicstore.pathtraversal.PathTraversalHandler;
-import io.vertx.demo.musicstore.serialize.DeserializeHandler;
+import io.vertx.demo.musicstore.serialize.DeserializeUploadAsyncHandler;
 import io.vertx.demo.musicstore.xpath.XPathHandler;
-import io.vertx.demo.musicstore.xxe.XXEHandler;
+import io.vertx.demo.musicstore.xxe.XXEUploadAsyncHandler;
 import io.vertx.ext.bridge.PermittedOptions;
 import io.vertx.ext.web.handler.sockjs.BridgeOptions;
 import io.vertx.reactivex.core.AbstractVerticle;
@@ -72,8 +76,10 @@ public class MusicStoreVerticle extends AbstractVerticle {
 
 	// Convenience method so you can run it in your IDE
 	public static void main(final String[] args) {
-		Launcher.main(new String[] { "run", "io.vertx.demo.musicstore.MusicStoreVerticle" });
+		Launcher.main(new String[] { "run", MusicStoreVerticle.class.getName() });
 	}
+
+	private final String FILE_UPLOAD_LOCATION = System.getProperty("java.io.tmpdir");
 
 	@Override
 	public Completable rxStart() {
@@ -92,10 +98,10 @@ public class MusicStoreVerticle extends AbstractVerticle {
 
 	private Completable updateDB() {
 		return vertx.rxExecuteBlocking(future -> {
-			// Flyway flyway = new Flyway();
-			// flyway.setDataSource(datasourceConfig.getUrl(), datasourceConfig.getUser(), datasourceConfig.getPassword());
-			// flyway.setValidateOnMigrate(false);
-			// flyway.migrate();
+			Flyway flyway = new Flyway();
+			flyway.setDataSource(datasourceConfig.getUrl(), datasourceConfig.getUser(), datasourceConfig.getPassword());
+			flyway.setValidateOnMigrate(false);
+			flyway.migrate();
 			future.complete();
 		}).ignoreElement();
 	}
@@ -135,12 +141,14 @@ public class MusicStoreVerticle extends AbstractVerticle {
 		IndexHandler indexHandler = new IndexHandler(dbClient, dbQueries, templateEngine);
 		router.get("/").handler(indexHandler);
 		router.get("/index.html").handler(indexHandler);
-
 		router.get("/genres/:genreId").handler(new GenreHandler(dbClient, dbQueries, templateEngine));
-		router.get("/deserialize").handler(new DeserializeHandler());
+
+		// Enable multipart form data parsing
+		router.post("/deserialize").handler(BodyHandler.create().setUploadsDirectory(FILE_UPLOAD_LOCATION));
+		router.post("/deserialize").handler(new DeserializeUploadAsyncHandler());
 
 		router.get("/pathtraversal").handler(new PathTraversalHandler());
-		router.get("/xxe").handler(new XXEHandler());
+		router.post("/xxe").handler(new XXEUploadAsyncHandler());
 		router.get("/xpath").handler(new XPathHandler());
 		router.get("/error").handler(new CustomErrorHandler());
 		router.get("/albums/:albumId").handler(new AlbumHandler(dbClient, dbQueries, templateEngine, vertx));
@@ -150,6 +158,10 @@ public class MusicStoreVerticle extends AbstractVerticle {
 		router.get("/ajax/albums/:albumId/comments").handler(new AjaxAlbumCommentsHandler(mongoDatabase, templateEngine));
 
 		router.post("/api/albums/:albumId/comments").consumes("text/plain").handler(new AddAlbumCommentHandler(mongoDatabase));
+
+		DatabaseHandler dbHandler = new DatabaseHandler(dbClient, vertx.eventBus().consumer(DatabaseHandler.ADDRESS), vertx);
+		dbHandler.execute();
+		router.get("/api/csv").handler(new CSVDownloadHandler(vertx));
 
 		router.get("/login").handler(new ReturnUrlHandler());
 		router.get("/login").handler(rc -> templateEngine.rxRender(rc.data(), "templates/login").subscribe(rc.response()::end, rc::fail));
@@ -161,23 +173,21 @@ public class MusicStoreVerticle extends AbstractVerticle {
 
 		router.route().handler(StaticHandler.create());
 
-		if (1 == 2) {
-			// Si ponemos gestor de excepciones propio
-			// ya no sale la pagina de error de hdiv
-			router.route().failureHandler(ctx -> {
-				StringWriter sw = new StringWriter();
-				PrintWriter pw = new PrintWriter(sw);
-				ctx.failure().printStackTrace(pw);
+		// Si ponemos gestor de excepciones propio
+		// ya no sale la pagina de error de hdiv
+		router.route().failureHandler(ctx -> {
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			ctx.failure().printStackTrace(pw);
 
-				final JsonObject error = new JsonObject().put("timestamp", System.nanoTime())
-						.put("exception", ctx.failure().getClass().getName()).put("exceptionMessage", sw.toString())
-						.put("path", ctx.request().path());
+			final JsonObject error = new JsonObject().put("timestamp", System.nanoTime())
+					.put("exception", ctx.failure().getClass().getName()).put("exceptionMessage", sw.toString())
+					.put("path", ctx.request().path());
 
-				ctx.response().putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8");
-				ctx.response().end(error.encode());
+			ctx.response().putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8");
+			ctx.response().end(error.encode());
 
-			});
-		}
+		});
 
 		return vertx.createHttpServer().requestHandler(router).rxListen(8080).ignoreElement();
 	}

@@ -1,5 +1,9 @@
 package io.vertx.demo.musicstore.serialize;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
 import com.thoughtworks.xstream.XStream;
 
 public class XStreamTest {
@@ -11,6 +15,10 @@ public class XStreamTest {
 		this.testType = testType;
 	}
 
+	public XStreamTest() {
+		super();
+	}
+
 	public void doSerializationTest() {
 		// CVE-2016-0792
 		// CVE-2013-7285
@@ -19,6 +27,22 @@ public class XStreamTest {
 		// XStream.setupDefaultSecurity(xStream);// 1.4.10
 		org.codehaus.groovy.runtime.MethodClosure.ALLOW_RESOLVE = true;
 		xStream.fromXML(this.getClass().getResourceAsStream(testType.getTestPayload()));
+
+	}
+
+	public void doSerializationXStream(final String pathFile) {
+		// CVE-2016-0792
+		// CVE-2013-7285
+		// CVE-2019-10173
+		XStream xStream = new XStream();
+		// XStream.setupDefaultSecurity(xStream);// 1.4.10
+		org.codehaus.groovy.runtime.MethodClosure.ALLOW_RESOLVE = true;
+		try {
+			xStream.fromXML(new FileInputStream(new File(pathFile)));
+		}
+		catch (FileNotFoundException e) {
+			throw new RuntimeException("fileNotFound:" + pathFile);
+		}
 
 	}
 
