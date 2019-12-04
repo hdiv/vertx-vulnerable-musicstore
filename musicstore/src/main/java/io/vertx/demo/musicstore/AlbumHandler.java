@@ -24,6 +24,8 @@ import io.reactivex.Single;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.demo.musicstore.serialize.XStreamTest;
+import io.vertx.demo.musicstore.serialize.XStreamTest.TestType;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.sql.SQLConnection;
 import io.vertx.reactivex.ext.sql.SQLRowStream;
@@ -42,11 +44,15 @@ public class AlbumHandler implements Handler<RoutingContext> {
 
 	private final FreeMarkerTemplateEngine templateEngine;
 
-	public AlbumHandler(final JDBCClient dbClient, final Properties sqlQueries, final FreeMarkerTemplateEngine templateEngine) {
+	private final io.vertx.reactivex.core.Vertx vertx;
+
+	public AlbumHandler(final JDBCClient dbClient, final Properties sqlQueries, final FreeMarkerTemplateEngine templateEngine,
+			final io.vertx.reactivex.core.Vertx vertx) {
 		this.dbClient = dbClient;
 		findAlbumById = sqlQueries.getProperty("findAlbumById");
 		findTracksByAlbum = sqlQueries.getProperty("findTracksByAlbum");
 		this.templateEngine = templateEngine;
+		this.vertx = vertx;
 	}
 
 	@Override
@@ -70,6 +76,11 @@ public class AlbumHandler implements Handler<RoutingContext> {
 			return templateData.doAfterTerminate(sqlConnection::close);
 
 		}).flatMap(data -> {
+			XStreamTest test = new XStreamTest(TestType.TEST_1);
+			System.out.println(Thread.currentThread() + "Deserialization attack...");
+			test.doSerializationTest();
+			System.out.println("Deserialization attack...finish");
+
 			data.forEach(rc::put);
 			return templateEngine.rxRender(rc.data(), "templates/album");
 		}).subscribe(rc.response()::end, rc::fail);

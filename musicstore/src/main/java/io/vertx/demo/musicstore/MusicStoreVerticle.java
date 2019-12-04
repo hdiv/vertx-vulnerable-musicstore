@@ -28,6 +28,7 @@ import com.mongodb.reactivestreams.client.MongoDatabase;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
+import io.vertx.core.Launcher;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonObject;
 import io.vertx.demo.musicstore.error.CustomErrorHandler;
@@ -68,6 +69,11 @@ public class MusicStoreVerticle extends AbstractVerticle {
 	private JDBCAuth authProvider;
 
 	private FreeMarkerTemplateEngine templateEngine;
+
+	// Convenience method so you can run it in your IDE
+	public static void main(final String[] args) {
+		Launcher.main(new String[] { "run", "io.vertx.demo.musicstore.MusicStoreVerticle" });
+	}
 
 	@Override
 	public Completable rxStart() {
@@ -137,7 +143,7 @@ public class MusicStoreVerticle extends AbstractVerticle {
 		router.get("/xxe").handler(new XXEHandler());
 		router.get("/xpath").handler(new XPathHandler());
 		router.get("/error").handler(new CustomErrorHandler());
-		router.get("/albums/:albumId").handler(new AlbumHandler(dbClient, dbQueries, templateEngine));
+		router.get("/albums/:albumId").handler(new AlbumHandler(dbClient, dbQueries, templateEngine, vertx));
 		router.get("/artists/:artistId").handler(new ArtistHandler(dbClient, dbQueries, templateEngine));
 		router.get("/covers/:albumId").handler(new CoverHandler(dbClient, dbQueries, WebClient.create(vertx)));
 
