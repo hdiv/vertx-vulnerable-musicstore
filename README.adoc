@@ -20,33 +20,24 @@ image::album-page.png[Album]
 
 == Runnning
 
+=== With Docker
+
 If you only want to try the application without modifying it, run the build and start the components with `docker-compose`.
 
 [source,shell]
 ----
+# Set path to hdiv agent
+export HDIV_AGENT=/absoute/path/to/hdiv-ee-agent.jar
+# If you have an Hdiv license, copy it to the config dir
+cp license.hdiv hdiv/conf/
+
 mvn clean package
 docker-compose up
 ----
 
 When all components are up browse to http://localhost:8080.
 
-Otherwise start each component individually.
-
-=== The Postgres database
-
-[source,shell]
-----
-docker run --rm --name musicstore-db -e POSTGRES_USER=music -e POSTGRES_PASSWORD=music -e POSTGRES_DB=musicdb -p 5432:5432 postgres
-----
-
-=== The MongoDB server
-
-[source,shell]
-----
-docker run --rm --name musicstore-mongo -p 27017:27017 mongo
-----
-
-=== Development
+=== With Maven
 
 * Do one time build to pull the dependencies `mvn clean install`
 * To run the application in foreground do `mvn vertx:run` with redeploy enabled
