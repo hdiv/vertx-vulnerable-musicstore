@@ -1,9 +1,0 @@
-*.iml
-.DS_Store
-.vertx/
-.idea/
-.settings/
-target/
-hdiv/
-!hdiv/conf/agent.config
-!hdiv/conf/license.hdiv
